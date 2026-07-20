@@ -195,7 +195,7 @@ fig.add_trace(
 )
 
 fig.update_layout(
-    title=os.path.basename(file_path)+f"Settling criteria: {settling_criteria*100:.1f}%",
+    title=os.path.basename(file_path) + f"\nSettling criteria: {settling_criteria*100:.1f}%",
     template="plotly_white",
     hovermode="x unified",
     legend=dict(
