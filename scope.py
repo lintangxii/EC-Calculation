@@ -55,9 +55,10 @@ peaks = peaks_loadcell1
 
 
 # Find settling points for each trough
+settling_criteria = 0.993  # Settle to 99.3% of the peak value
 settling_points_indices = []
 for i in range(len(troughs) - 1):
-    settling_points_index, settling_target = find_settling_index(df["EC"], troughs[i], troughs[i+1], settle = 0.993, polyorder=2, window_length=21)
+    settling_points_index, settling_target = find_settling_index(df["EC"], troughs[i], troughs[i+1], settle = settling_criteria, polyorder=2, window_length=21)
     settling_points_indices.append(settling_points_index)
 
 # Find settling time
@@ -194,7 +195,7 @@ fig.add_trace(
 )
 
 fig.update_layout(
-    title=os.path.basename(file_path),
+    title=os.path.basename(file_path)+f"Settling criteria: {settling_criteria*100:.1f}%",
     template="plotly_white",
     hovermode="x unified",
     legend=dict(
