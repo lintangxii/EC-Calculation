@@ -139,7 +139,7 @@ def detect_peaks(data, fs=10, prominence_ratio=0.2, distance_sec=30):
     return peaks, troughs, data_smooth
 
 # find settling index
-def find_settling_index(ec, start_idx, end_idx, settle=0.95, smooth=True, window_length=11, polyorder=2):
+def find_settling_index(ec, start_idx, end_idx, settle=0.982, smooth=True, window_length=11, polyorder=2):
     """
     Find the settling index using an optional smoothing filter.
 
