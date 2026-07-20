@@ -62,7 +62,9 @@ for i in range(len(troughs) - 1):
 
 # Find settling time
 settling_times = (np.array(settling_points_indices) - np.array(peaks))/fs
-print(f"Settling times (s): {settling_times}")
+print(f"Settling times (s): {settling_times.round(2)}")
+settling_weights = np.array(df["LoadCell1"].iloc[peaks]) - np.array(df["LoadCell1"].iloc[settling_points_indices])
+print(f"Settling weights (g): {settling_weights.round(2)}")
 
 # Create figure with secondary axis
 fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -80,15 +82,15 @@ if save_file == True:
     })
     # output_df.to_csv("scope.csv", index=False)
 
-    data_attributes = [
-        df["t_datetime"].iloc[troughs],
-        settling_points_indices,
-    ]
+    # data_attributes = [
+    #     df["t_datetime"].iloc[troughs],
+    #     settling_points_indices,
+    # ]
     
-    with open("output_attributes.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        for i in data_attributes:
-            writer.writerow(i)
+    # with open("output_attributes.csv", "w", newline="") as f:
+    #     writer = csv.writer(f)
+    #     for i in data_attributes:
+    #         writer.writerow(i)
 
 colors = [
     "#FF0400", "#0011FF", "#00CC96", "#AB63FA",
@@ -170,6 +172,21 @@ fig.add_trace(
         ),
     ),
     secondary_y=False
+)
+
+fig.add_trace(
+    go.Scatter(
+        x=df["t_datetime"].iloc[peaks],
+        y=df["LoadCell1"].iloc[peaks],
+        mode="markers",
+        name="LoadCell1 Peaks",
+        marker=dict(
+            color="Red",
+            size=8,
+            symbol="x"
+        ),
+    ),
+    secondary_y=True
 )
 
 fig.update_layout(
