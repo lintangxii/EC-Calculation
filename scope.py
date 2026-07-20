@@ -55,7 +55,7 @@ peaks = peaks_loadcell1
 
 
 # Find settling points for each trough
-settling_criteria = 0.993  # Settle to 99.3% of the peak value
+settling_criteria = 0.982  # Settle to 98.2% of the peak value
 settling_points_indices = []
 for i in range(len(troughs) - 1):
     settling_points_index, settling_target = find_settling_index(df["EC"], troughs[i], troughs[i+1], settle = settling_criteria, polyorder=2, window_length=21)
@@ -139,7 +139,7 @@ fig.add_trace(
         x=df["t_datetime"].iloc[troughs],
         y=df["LoadCell1"].iloc[troughs],
         mode="markers",
-        name="LoadCell1 Critical Points",
+        name="Peak to peak reference",
         marker=dict(
             color="Blue",
             size=8,
@@ -184,7 +184,7 @@ fig.add_trace(
         x=df["t_datetime"].iloc[peaks],
         y=df["LoadCell1"].iloc[peaks],
         mode="markers",
-        name="LoadCell1 Peaks",
+        name="Concentration starting point",
         marker=dict(
             color="Red",
             size=8,
