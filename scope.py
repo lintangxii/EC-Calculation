@@ -99,8 +99,11 @@ colors = [
     "#F319B5"
 ]
 
+
 # Add traces for each column in the DataFrame
 for i, col in enumerate(df.columns[1:]):
+    if col == "t_sec" or col == "t_datetime":
+        continue  # Skip time columns
 
     # Skip non-numeric columns
     if not pd.api.types.is_numeric_dtype(df[col]):
