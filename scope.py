@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import os
 import numpy as np
 from function import estimate_frequency, detect_peaks, find_settling_index
+from time import strftime
 
 # Hide Tkinter window
 root = Tk()
@@ -21,13 +22,13 @@ if not file_path:
     print("No file selected.")
     exit()
 
-# Read CSV
+# Parameters
 save_file = 0  # Set to True if you want to save the output CSV
 data_clip = 0  # Set to True if you want to clip the data
 analytical_mode = 0  # Set to True if you want to run in analytical mode
 
 # save file parameters
-file_name = ''
+file_name = f'Output {strftime("%Y-%m-%d_%H-%M-%S")}'  # Name of the output CSV file (without extension)
 
 # Data clipping parameters
 data_skip = 1200            # Number of data points to skip from the beginning by index
