@@ -34,10 +34,9 @@ data_skip = 1200
 data_range = 420
 
 # analytical_mode parameters
-settling_criteria = 0.982  # Settle to 98.2% of the peak value (1.8% error)
+settling_criteria = 0.982  # you can set this from 0 to 1.0, where 1.0 means no settling criteria (i.e., the signal must reach the peak value exactly).
 savgol_window_length = 21  # Must be odd
 savgol_polyorder = 2  # Polynomial order for Savitzky-Golay filter
-
 
 if data_clip == 1:
     df = pd.read_csv(file_path).iloc[data_skip:int(data_skip) + int(data_range)].reset_index(drop=True)
