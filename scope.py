@@ -30,8 +30,8 @@ analytical_mode = 0  # Set to True if you want to run in analytical mode
 file_name = ''
 
 # Data clipping parameters
-data_skip = 1200
-data_range = 420
+data_skip = 1200            # Number of data points to skip from the beginning by index
+data_range = 420            # Number of data points to include by index
 
 # analytical_mode parameters
 settling_criteria = 0.982  # you can set this from 0 to 1.0, where 1.0 means no settling criteria (i.e., the signal must reach the peak value exactly).
