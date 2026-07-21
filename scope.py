@@ -26,9 +26,18 @@ save_file = 0  # Set to True if you want to save the output CSV
 data_clip = 0  # Set to True if you want to clip the data
 analytical_mode = 0  # Set to True if you want to run in analytical mode
 
+# save file parameters
+file_name = ''
+
 # Data clipping parameters
 data_skip = 1200
 data_range = 420
+
+# analytical_mode parameters
+settling_criteria = 0.982  # Settle to 98.2% of the peak value (1.8% error)
+savgol_window_length = 21  # Must be odd
+savgol_polyorder = 2  # Polynomial order for Savitzky-Golay filter
+
 
 if data_clip == 1:
     df = pd.read_csv(file_path).iloc[data_skip:int(data_skip) + int(data_range)].reset_index(drop=True)
@@ -57,10 +66,10 @@ if analytical_mode == 1:
 
 
     # Find settling points for each trough
-    settling_criteria = 0.982  # Settle to 98.2% of the peak value
+    
     settling_points_indices = []
     for i in range(len(troughs) - 1):
-        settling_points_index, settling_target = find_settling_index(df["EC"], troughs[i], troughs[i+1], settle = settling_criteria, polyorder=2, window_length=21)
+        settling_points_index, settling_target = find_settling_index(df["EC"], troughs[i], troughs[i+1], settle = settling_criteria, polyorder=savgol_polyorder, window_length=savgol_window_length)
         settling_points_indices.append(settling_points_index)
 
     # Find settling time
@@ -75,7 +84,7 @@ fig = make_subplots(specs=[[{"secondary_y": True}]])
 # save to CSV
 if save_file == True:
     output_df = pd.DataFrame({
-        "Time": df["t_datetime"],
+        "Time": df["t_datetime"],                   # you can also add other columns as needed. example: "{Column Name}": df["{Column Name}"],
         # "EC": df["magnitude"],
         "EC": df["EC"],
         # "EC_Error": df["EC_Error"],
@@ -83,7 +92,7 @@ if save_file == True:
         # 'Real': df['real'],
         # 'Imaginary': df['imag'],
     })
-    # output_df.to_csv("scope.csv", index=False)
+    output_df.to_csv(f"{file_name}.csv", index=False)
 
     # data_attributes = [
     #     df["t_datetime"].iloc[troughs],
