@@ -5,8 +5,37 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import os
 import numpy as np
-from function import estimate_frequency, detect_peaks, find_settling_index
+from function import estimate_frequency, detect_peaks
 from time import strftime
+
+# Peak filter
+def peak_filter(data, threshold=0.98):
+    """
+    Filters out peaks in the data that are below a certain threshold.
+
+    Parameters:
+    - data: A 1D numpy array or list of data points.
+    - threshold: A float value representing the minimum peak height to keep.
+
+    Returns:
+    - average_peak: A float value representing the average height of the peaks above the threshold.
+    """
+    # Convert to numpy array if it's a list
+    data = np.array(data)
+
+    # Find max value in the data
+    max_value = np.max(data)
+
+    # Compute range based on the threshold
+    range_value = max_value * threshold
+
+    # Filter out peaks below the threshold
+    filtered_peaks = data[data >= range_value]
+
+    # find the average of the filtered peaks
+    average_peak = np.mean(filtered_peaks)
+    
+    return average_peak
 
 # Hide Tkinter window
 root = Tk()
@@ -34,11 +63,6 @@ file_name = f'Output {strftime("%Y-%m-%d_%H-%M-%S")}'  # Name of the output CSV 
 data_skip = 775            # Number of data points to skip from the beginning by index
 data_range = 100            # Number of data points to include by index
 
-# analytical_mode parameters
-settling_criteria = 0.982  # you can set this from 0 to 1.0, where 1.0 means no settling criteria (i.e., the signal must reach the peak value exactly).
-savgol_window_length = 21  # Must be odd
-savgol_polyorder = 2  # Polynomial order for Savitzky-Golay filter
-
 if data_clip == 1:
     df = pd.read_csv(file_path).iloc[data_skip:int(data_skip) + int(data_range)].reset_index(drop=True)
 else:
@@ -64,13 +88,22 @@ if analytical_mode == 1:
     troughs = troughs_loadcell1
     peaks = peaks_loadcell1
 
+    # create an array to store the filtered peak values
+    filtered_peaks = np.zeros_like(df["EC"])
 
-    # Find settling points for each trough
-    
-    settling_points_indices = []
     for i in range(len(troughs) - 1):
-        settling_points_index, settling_target = find_settling_index(df["EC"], troughs[i], troughs[i+1], settle = settling_criteria, polyorder=savgol_polyorder, window_length=savgol_window_length)
-        settling_points_indices.append(settling_points_index)
+        # slice the data between the current peak and the next trough
+        sliced_data_EC = df["EC"].iloc[peaks[i]:troughs[i + 1]]
+        filtered_peak = peak_filter(sliced_data_EC)
+        filtered_peaks[peaks[i]:troughs[i + 1]] = filtered_peak
+
+    df["Filtered_EC_Peaks"] = filtered_peaks
+
+    # Find settling points for each trough    
+    # settling_points_indices = []
+    # for i in range(len(troughs) - 1):
+    #     settling_points_index, settling_target = find_settling_index(df["EC"], troughs[i], troughs[i+1], settle = settling_criteria, polyorder=savgol_polyorder, window_length=savgol_window_length)
+    #     settling_points_indices.append(settling_points_index)
 
     # Find settling time
     # settling_times = (np.array(settling_points_indices) - np.array(peaks))/fs
@@ -112,7 +145,7 @@ colors = [
     "#AB63FA",
     "#FFA15A", 
     "#19D3F3", 
-    "#FF6692", 
+    "#0B106A", 
     "#B6E880",
     "#F319B5"
 ]
@@ -145,7 +178,7 @@ for i, col in enumerate(df.columns[1:]):
             line=dict(
                 color=colors[i % len(colors)],
                 width=2,
-                shape="spline",
+                shape="linear"  # Use "linear" for straight lines, "spline" for smooth curves
             ),
         ),
         secondary_y=(col.lower() in secondary_y)
@@ -167,35 +200,6 @@ if analytical_mode == 1:
     ),
     secondary_y=True
 )
-    fig.add_trace(
-        go.Scatter(
-            x=df["t_datetime"].iloc[settling_points_indices],
-            y=df["LoadCell1"].iloc[settling_points_indices],
-            mode="markers",
-            name="LoadCell1 Settling Points",
-            marker=dict(
-                color="Green",
-                size=8,
-                symbol="x"
-            ),
-        ),
-        secondary_y=True
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df["t_datetime"].iloc[settling_points_indices],
-            y=df["EC"].iloc[settling_points_indices],
-            mode="markers",
-            name="EC Settling Points",
-            marker=dict(
-                color="Black",
-                size=8,
-                symbol="x"
-            ),
-        ),
-        secondary_y=False
-    )
 
     fig.add_trace(
         go.Scatter(
@@ -213,7 +217,7 @@ if analytical_mode == 1:
     )
 
 fig.update_layout(
-    title=os.path.basename(file_path) + f"\nSettling criteria: {settling_criteria*100:.1f}%" if analytical_mode == 1 else os.path.basename(file_path),
+    title=os.path.basename(file_path),
     template="plotly_white",
     hovermode="x unified",
     legend=dict(
